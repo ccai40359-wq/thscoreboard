@@ -1,0 +1,15 @@
+name: vps-probe
+on:
+  workflow_dispatch:
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: probe-vps
+        run: |
+          echo "=== TCP22 banner grab ==="
+          timeout 10 bash -c 'exec 3<>/dev/tcp/43.160.237.109/22 && head -c 80 <&3' || echo "BANNER_FAIL rc=$?"
+          echo "=== control port 65001 ==="
+          timeout 6 bash -c 'exec 3<>/dev/tcp/43.160.237.109/65001' && echo OPEN || echo "CLOSED_OR_FILTERED rc=$?"
+          echo "=== ping ==="
+          ping -c 3 -W 2 43.160.237.109 | tail -2 || true
